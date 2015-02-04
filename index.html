@@ -17,9 +17,9 @@
     <script charset="utf-8" type="text/javascript">
       var playerSpeed = 4;
 
-
-      var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+      var game = new Phaser.Game(800, 600, Phaser.Canvas, '', { preload: preload, create: create, update: update, render: render });
       var player;
+      var cursors;
     </script>
 
 
