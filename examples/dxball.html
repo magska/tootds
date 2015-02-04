@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+    <title>Phaser - Making your first game, part 8</title>
+  <script type="text/javascript" src="phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>-
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var player;
+var ball;
+var cursors;
+var bricks;
+var score = 0;
+var scoreText;
+
+function preload(){
+  game.load.image('ball', 'assets/ball.png');
+  game.load.image('platform', 'assets/platform.png');
+  game.load.image('brick', 'assets/brick.png')
+}
+
+function create(){
+  // Set background
+  game.stage.backgroundColor = '#999999';
+
+  //brick = game.add.sprite(0, 20, 'brick');
+
+  // Add ball to the game
+  ball = game.add.sprite((game.world.width/2)-12, game.world.height-200, 'ball')
+
+  // The player and its settings
+  player = game.add.sprite((game.world.width/2)-50, game.world.height-30, 'platform');
+
+  //  We need to enable physics on the player and ball
+  game.physics.arcade.enable(player);
+  game.physics.arcade.enable(ball);
+
+  // Avoid player from moving outside the screen
+  player.body.collideWorldBounds = true;
+
+  ball.body.velocity.y = 200
+  ball.body.collideWorldBounds = true;
+
+  // create bricks
+  bricks = game.add.group();
+  bricks.enableBody = true;
+  for(var i = 0; i < game.world.width; i += 50){
+    addBrick(i, 200);
+  }
+
+  for(var i = 25; i < game.world.width-50; i += 50){
+    addBrick(i, 220);
+  }
+
+  for(var i = 50; i < game.world.width-50; i += 50){
+    addBrick(i, 240);
+  }
+  // Give it a body
+  game.physics.arcade.enable(bricks);
+
+
+  //  Our controls.
+  cursors = game.input.keyboard.createCursorKeys();
+
+  scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+}
+
+
+
+function update(){
+
+  // Ball and player center
+  var playerCenter = player.body.center.x;
+  var ballCenter = ball.body.center.x;
+
+  // ball collide with player
+  game.physics.arcade.collide(player, ball, function(player, ball){
+    ball.body.velocity.y = -200;
+
+
+    // Calculate ball velocity based on
+    if(ball.body.center.x == player.body.center.x){
+      ball.body.velocity.x == 0;
+    }
+    else if(ball.body.center.x > player.body.center.x){
+      ball.body.velocity.x = (ballCenter - playerCenter)*4;
+    }else{
+      ball.body.velocity.x = ((playerCenter - ballCenter)*4)*-1;
+    }
+  });
+
+  // ball collide with brick
+  game.physics.arcade.collide(ball, bricks, function(ball, brick){
+    // remove brick
+    brick.kill();
+    ball.body.velocity.y = 200;
+    if(ball.body.center.x == brick.body.center.x){
+      ball.body.velocity.x;
+    }
+    else if(ball.body.center.x > brick.body.center.x){
+      ball.body.velocity.x = (ballCenter - brick.body.center.x)*4;
+    }
+    else{
+      ball.body.velocity.x = ((brick.body.center.x - ballCenter)*4)*-1
+    }
+    // update score
+    score += 50;
+    scoreText.text = 'score: ' + score;
+
+  });
+
+  // Wall collides
+  // When ball hits top of the world
+  if(ball.position.y == 0){
+    ball.body.velocity.y = 150;
+  }
+
+  // When ball hits left wall
+  if(ball.position.x == 0){
+    ball.body.velocity.x = 150;
+  }
+
+  // When ball hits right wall
+  if((ball.position.x+ball.width) == game.world.width){
+    ball.body.velocity.x = -150;
+  }
+
+  if(ball.position.y >= player.position.y){
+    //console.log('Game over');
+  }
+
+
+  if (cursors.left.isDown)
+  {
+      //  Move to the left
+      player.body.velocity.x = -250;
+  }
+  else if (cursors.right.isDown)
+  {
+      //  Move to the right
+      player.body.velocity.x = 250;
+  }
+  else
+  {
+      player.body.velocity.x = 0;
+      //player.frame = 4;
+  }
+}
+
+function addBrick(x, y){
+  var brick = bricks.create(x, y, 'brick');
+  brick.body.immovable = true;
+}
+
+</script>
+</body>
+</html>
